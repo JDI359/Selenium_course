@@ -1,8 +1,9 @@
 package com.selenium.course.tests;
 
-import org.openqa.selenium.By;
-import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.WebElement;
+import com.opencsv.exceptions.CsvException;
+import com.selenium.course.base.TestUtil;
+import com.selenium.course.utils.CsvReader;
+import org.openqa.selenium.*;
 import org.openqa.selenium.firefox.FirefoxDriver;
 import org.openqa.selenium.support.ui.Select;
 import org.testng.Assert;
@@ -11,9 +12,11 @@ import org.testng.annotations.BeforeTest;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
-public class LoginTest {
+import java.io.IOException;
 
-    WebDriver driver = null;
+public class LoginTest extends TestUtil {
+
+//    WebDriver driver = null;
 
     @DataProvider(name = "login-data")
     public static Object[][] dataProviderHardcodedData() {
@@ -24,16 +27,21 @@ public class LoginTest {
         };
     }
 
-
-    @BeforeTest
-    public void setupDriver(){
-        System.setProperty("webdriver.gecko.driver", "src/main/resources/geckodriver.exe");
-        driver = new FirefoxDriver();
+    @DataProvider(name = "login-data-file")
+    public static Object[][] dataProviderFromCsvFile() throws IOException, CsvException {
+        return CsvReader.readCsvFile("src/test/resources/login-data.csv");
     }
 
-    @Test(dataProvider = "login-data")
-    public void executeSimpleTest(String user, String pass) throws InterruptedException {
-        driver.get("https://www.saucedemo.com/");
+//    @BeforeTest
+//    public void setupDriver(){
+//        System.setProperty("webdriver.gecko.driver", "src/main/resources/geckodriver.exe");
+//        driver = new FirefoxDriver();
+//    }
+
+    @Test(dataProvider = "login-data-file")
+    public void executeSimpleTest(String user, String pass) {
+//        driver.get("https://www.saucedemo.com/");
+
         WebElement username = driver.findElement(By.id("user-name"));
         username.sendKeys(user);
 
@@ -41,12 +49,14 @@ public class LoginTest {
         password.sendKeys(pass);
 
         WebElement loginButton = driver.findElement(By.className("btn_action"));
-        loginButton.click();
-
+//        loginButton.click();
+        JavascriptExecutor js = (JavascriptExecutor) driver;
+        js.executeScript("arguments[0].scrollIntoView();", loginButton);
+        js.executeScript("arguments[0].click();", loginButton);
     }
 
-    @AfterTest
-    public void tearDownDriver(){
-        driver.quit();
-    }
+//    @AfterTest
+//    public void tearDownDriver(){
+//        driver.quit();
+//    }
 }
